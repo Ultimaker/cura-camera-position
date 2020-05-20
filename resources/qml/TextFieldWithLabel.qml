@@ -4,38 +4,38 @@ import QtQuick.Controls 2.3
 import UM 1.4 as UM
 import Cura 1.0 as Cura
 
-Item
+Row
 {
+    id: base
+    
     property alias value: textField.text
     property alias text: label.text
-    property alias validator: textField.validator
+    property alias readOnly: textField.readOnly
+    
+    property alias textWidth: textField.width
+    property alias labelWidth: label.width
     height: childrenRect.height
-
+    
+    signal editingFinished();
+    
+    padding: UM.Theme.getSize("thick_margin").width
+    spacing: UM.Theme.getSize("thin_margin").width
+    
     Label
     {
-        id: label
+        id: label  
         text: "Sample text"
-        anchors
-        {
-            right: textField.left
-            left: parent.left
-            verticalCenter: textField.verticalCenter
-        }
+        horizontalAlignment: Text.AlignRight
     }
 
-    Cura.TextField
+    Cura.ReadOnlyTextField
     {
         id: textField
-        width: (parent.width / 2) | 0
-        anchors
-        {
-            right: parent.right
-        }
         text: "0"
-        validator: IntValidator
+        
+        onEditingFinished:
         {
-            bottom: -5000
-            top: 5000
+            base.editingFinished();
         }
     }
 }

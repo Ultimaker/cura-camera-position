@@ -4,122 +4,82 @@ import QtQuick.Controls 2.3
 import UM 1.4 as UM
 import Cura 1.0 as Cura
 
+import CameraPositionPlugin 1.0 as CPP
 
 UM.Dialog
 {
     id: dialog
 
     title: "Camera Position"
-    width: UM.Theme.getSize("setting").width
-    height: contents.height
-
+    width: contents.width
+    minimumWidth: screenScaleFactor * 600;
+    minimumHeight: screenScaleFactor * 400;
+    height: { contents.height + screenScaleFactor * 80 }
+    
     Column
     {
         id: contents
         padding: UM.Theme.getSize("thick_margin").width
         spacing: UM.Theme.getSize("thin_margin").width
-        width: parent.width
-
-        TextFieldWithLabel
+        
+        // Todo: Make it work with a Reapeater
+        CameraViewRow
         {
-            id: xTranslateField
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                margins: parent.padding
-            }
-            text: "X camera position"
+            name: "stored_1"
+            live: false
         }
-
-        TextFieldWithLabel
+        CameraViewRow
         {
-            id: yTranslateField
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                margins: parent.padding
-            }
-            text: "Y camera position"
+            name: "stored_2"
+            live: false
         }
-
-        TextFieldWithLabel
+        CameraViewRow
         {
-            id: zTranslateField
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                margins: parent.padding
-            }
-            text: "Z camera position"
+            name: "stored_3"
+            live: false
         }
-
-        TextFieldWithLabel
+        CameraViewRow
         {
-            id: xLookAtField
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                margins: parent.padding
-            }
-            text: "X look at position"
+            name: "stored_4"
+            live: false
         }
-
-        TextFieldWithLabel
+        CameraViewRow
         {
-            id: yLookAtField
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                margins: parent.padding
-            }
-            text: "Y look at position"
+            name: "stored_5"
+            live: false
         }
-
-        TextFieldWithLabel
+        CameraViewRow
         {
-            id: zLookAtField
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                margins: parent.padding
-            }
-            text: "Z look at position"
+            name: "stored_6"
+            live: false
         }
-
-        TextFieldWithLabel
+        CameraViewRow
         {
-            id: zoomFactor
-            anchors
-            {
-                left: parent.left
-                right: parent.right
-                margins: parent.padding
-            }
-            text: "Camera zoom factor (Orthographic)"
-            validator: DoubleValidator
-            {
-                bottom: -0.4999999999
-            }
+            name: "stored_7"
+            live: false
         }
-
-        Cura.PrimaryButton
+        CameraViewRow
         {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "Set camera position"
-            enabled: xTranslateField.value != "" && yTranslateField.value != "" && zTranslateField.value != "" &&
-                    xLookAtField.value != "" && yLookAtField.value != "" && zLookAtField.value != "" && zoomFactor != ""
-            onClicked:
-            {
-                UM.Controller.setCameraPosition(xTranslateField.value, zTranslateField.value, yTranslateField.value)
-                UM.Controller.setLookAtPosition(xLookAtField.value, zLookAtField.value, yLookAtField.value)
-                UM.Controller.setCameraZoomFactor(zoomFactor.value)
-            }
+            name: "stored_8"
+            live: false
         }
+        CameraViewRow
+        {
+            name: "stored_9"
+            live: false
+        }
+        CameraViewRow
+        {
+            name: "stored_10"
+            live: false
+        }  
+    }
+    
+    rightButtons: Button
+    {
+        id: closeButton
+        text: "Close"
+
+        onClicked: dialog.visible = false;
     }
 }
