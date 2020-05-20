@@ -1,5 +1,6 @@
 import os
-from typing import cast
+import ast
+from typing import cast, List
 
 from PyQt5.QtCore import QObject
 from UM.Extension import Extension
@@ -49,7 +50,34 @@ class CameraPositionExtension(QObject, Extension):
         plugin_path = PluginRegistry.getInstance().getPluginPath(self.getPluginId())
         path = os.path.join(plugin_path, "resources", "qml", "CameraPositionPanel.qml")
         self._view = CuraApplication.getInstance().createQmlComponent(path, {"manager": self})
-        for view in self._view.findChildren(CustomCameraView):
+        stored_views = self._initStoredViews()
+        
+        for idx, view in enumerate(self._view.findChildren(CustomCameraView)):
             view.controller = CuraApplication.getInstance().getController()
+            view.load(stored_views[idx])
             self.addMenuItem(view.name, view)
+            
+    def _initStoredViews(self) -> List[CustomCameraView]:
+        """Loads all views stored in preference if this is a first time use it will initialize the stored view
+        preference"""
+        
+        self._view.storeViews.connect(self._storeViews)
+        preferences = CuraApplication.getInstance().getPreferences()
+        stored_views = preferences.getValue("CuraCameraPosition/stored_views")
+        if stored_views is None:
+            default = CustomCameraView()
+            stored_views = []
+            for idx in range(1, 11):
+                default.name = 'stored_{}'.format(idx)
+                stored_views.append(default.dump())
+            preferences.addPreference("CuraCameraPosition/stored_views", stored_views)
+        else:
+            stored_views = ast.literal_eval(stored_views)
+        return stored_views
+            
+    def _storeViews(self) -> None:
+        """Store the views to the preference"""
+        preferences = CuraApplication.getInstance().getPreferences()
+        stored_views = [view.dump() for view in self._view.findChildren(CustomCameraView)]
+        preferences.setValue("CuraCameraPosition/stored_views", stored_views)
 
