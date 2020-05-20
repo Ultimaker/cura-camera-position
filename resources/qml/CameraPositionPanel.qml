@@ -27,51 +27,61 @@ UM.Dialog
         {
             name: "stored_1"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_2"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_3"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_4"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_5"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_6"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_7"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_8"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_9"
             live: false
+            anchors.right: contents.right
         }
         CameraViewRow
         {
             name: "stored_10"
             live: false
+            anchors.right: contents.right
         }  
     }
     
