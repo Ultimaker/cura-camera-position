@@ -51,8 +51,5 @@ class CameraPositionExtension(QObject, Extension):
         self._view = CuraApplication.getInstance().createQmlComponent(path, {"manager": self})
         for view in self._view.findChildren(CustomCameraView):
             view.controller = CuraApplication.getInstance().getController()
-            self.addMenuItem(str(view), view)
-            view.liveChanged.connect(self._updateMenu)
+            self.addMenuItem(view.name, view)
 
-    def _updateMenu(self):
-        pass
