@@ -165,11 +165,13 @@ class CustomCameraView(QObject):
 
     def __call__(self) -> None:
         """Calling the instance sets the active camera to the described state vector"""
+        self._controller.getScene().getActiveCamera().transformationChanged.connect(self.onTransformationChanged)
         self._controller.setCameraOrientation(ai=self._ai * pi / 180, aj=self._aj * pi / 180, ak=self._ak * pi / 180)
         self._controller.setCameraPosition(self._x, self._y, self._z)
         self._controller.setCameraPerspective(self._perspective)
         if not self._perspective:
             self._controller.setCameraZoomFactor(self._zoom)
+        self._controller.getScene().getActiveCamera().transformationChanged.disconnect(self.onTransformationChanged)
 
     def __repr__(self) -> str:
         projection = ', perspective' if self._perspective else ', zoom: {}, orthographic '.format(self.zoom)
