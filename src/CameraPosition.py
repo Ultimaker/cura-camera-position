@@ -68,7 +68,6 @@ class CameraPositionExtension(QObject, Extension):
         
         self._view.storeViews.connect(self._storeViews)
         preferences = CuraApplication.getInstance().getPreferences()
-        preferences.removePreference("CuraCameraPosition/stored_views")
         stored_views = preferences.getValue("CuraCameraPosition/stored_views")
         if stored_views is None:
             default = CustomCameraView()
