@@ -207,7 +207,6 @@ UM.Dialog
         {
             dialog.decoupleLive();
             dialog.storeViews();
-            dialog.visible = false;
         }
     }
 }
