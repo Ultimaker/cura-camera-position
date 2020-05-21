@@ -1,5 +1,5 @@
-import QtQuick 2.10
-import QtQuick.Controls 2.3
+import QtQuick 2.3
+import QtQuick.Controls 1.4
 
 import UM 1.4 as UM
 import Cura 1.0 as Cura
@@ -11,130 +11,165 @@ UM.Dialog
     id: dialog
 
     title: "Camera Position"
-    width: contents.width
-    minimumWidth: screenScaleFactor * 600;
+
+    minimumWidth: screenScaleFactor * 820;
     minimumHeight: screenScaleFactor * 400;
-    height: { contents.height + screenScaleFactor * 80 }
+    width: groupBox.width
+    height: { groupBox.height + screenScaleFactor * 80 }
+//    modality: Qt.NonModal Todo: Make it work nonmodal
     
     signal storeViews
     
-    Column
+    GroupBox
     {
-        id: contents
-        padding: UM.Theme.getSize("thick_margin").width
-        spacing: UM.Theme.getSize("thin_margin").width
+        id: groupBox
+        title: "Views"
+        height: { contents.height + screenScaleFactor * 40 }
         
-        // Todo: Make it work with a Reapeater
-        CameraViewRow
+        ExclusiveGroup { id: tabPositionGroup }
+        Column
         {
-            name: "stored_1"
-            id: "stored1"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
+            id: contents
+            spacing: UM.Theme.getSize("thin_margin").width
+            
+            CPP.CustomCameraView
             {
-                saveButton.enabled = true;
+                id: cameraView
+                name: "actual"
+                live: false
+//                onTransformationChanged:
+//                {
+//                    actualLocation.text = cameraView.description
+//                }
             }
+            
+            Label
+            {
+                id: actualLocation
+                text: cameraView.description
+            }
+            // Todo: Make it work with a Reapeater
+            CameraViewRow
+            {
+                name: "stored_1"
+                id: "stored1"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_2"
+                id: "stored2"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_3"
+                id: "stored3"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_4"
+                id: "stored4"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_5"
+                id: "stored5"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_6"
+                id: "stored6"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_7"
+                id: "stored7"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_8"
+                id: "stored8"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_9"
+                id: "stored9"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }
+            CameraViewRow
+            {
+                name: "stored_10"
+                id: "stored10"
+                exclusiveGroup: tabPositionGroup
+                live: false
+                anchors.right: contents.right
+                onChangedView:
+                {
+                    saveButton.enabled = true;
+                }
+            }  
         }
-        CameraViewRow
-        {
-            name: "stored_2"
-            id: "stored2"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }
-        CameraViewRow
-        {
-            name: "stored_3"
-            id: "stored3"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }
-        CameraViewRow
-        {
-            name: "stored_4"
-            id: "stored4"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }
-        CameraViewRow
-        {
-            name: "stored_5"
-            id: "stored5"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }
-        CameraViewRow
-        {
-            name: "stored_6"
-            id: "stored6"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }
-        CameraViewRow
-        {
-            name: "stored_7"
-            id: "stored7"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }
-        CameraViewRow
-        {
-            name: "stored_8"
-            id: "stored8"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }
-        CameraViewRow
-        {
-            name: "stored_9"
-            id: "stored9"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }
-        CameraViewRow
-        {
-            name: "stored_10"
-            id: "stored10"
-            live: false
-            anchors.right: contents.right
-            onChangedView:
-            {
-                saveButton.enabled = true;
-            }
-        }  
     }
     
     function decoupleLive()

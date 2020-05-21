@@ -25,6 +25,7 @@ class CameraPositionExtension(QObject, Extension):
         self.addMenuItem("Set camera position", self.showPopup)
 
         self._view = None
+        self._actual = None
 
         CuraApplication.getInstance().mainWindowChanged.connect(self._createView)
 
@@ -38,24 +39,28 @@ class CameraPositionExtension(QObject, Extension):
                 Logger.log("e", "Not creating Camera Position window since the QML component failed to be created.")
                 return
             
-        # Get all the different view points and set the controller
-        for view in self._view.findChildren(CustomCameraView):
-            view.controller.getScene().getActiveCamera().transformationChanged.connect(view.onTransformationChanged)
         self._view.show()
 
     def _createView(self) -> None:
+        """Create the plugin dialog component"""
+        
         Logger.log("d", "Creating Camera Position plugin view.")
 
-        # Create the plugin dialog component
         plugin_path = PluginRegistry.getInstance().getPluginPath(self.getPluginId())
         path = os.path.join(plugin_path, "resources", "qml", "CameraPositionPanel.qml")
         self._view = CuraApplication.getInstance().createQmlComponent(path, {"manager": self})
+        self._view.visibleChanged.connect(self._dialogVisibleChanged)
         stored_views = self._initStoredViews()
         
-        for idx, view in enumerate(self._view.findChildren(CustomCameraView)):
+        idx = 0
+        for view in self._view.findChildren(CustomCameraView):
             view.controller = CuraApplication.getInstance().getController()
-            view.load(stored_views[idx])
-            self.addMenuItem(view.name, view)
+            if view.name != 'actual':
+                view.load(stored_views[idx])
+                self.addMenuItem(view.name, view)
+                idx += 1
+            else:
+                self._actual = view
             
     def _initStoredViews(self) -> List[CustomCameraView]:
         """Loads all views stored in preference if this is a first time use it will initialize the stored view
@@ -63,6 +68,7 @@ class CameraPositionExtension(QObject, Extension):
         
         self._view.storeViews.connect(self._storeViews)
         preferences = CuraApplication.getInstance().getPreferences()
+        preferences.removePreference("CuraCameraPosition/stored_views")
         stored_views = preferences.getValue("CuraCameraPosition/stored_views")
         if stored_views is None:
             default = CustomCameraView()
@@ -77,7 +83,22 @@ class CameraPositionExtension(QObject, Extension):
             
     def _storeViews(self) -> None:
         """Store the views to the preference"""
+        
         preferences = CuraApplication.getInstance().getPreferences()
         stored_views = [view.dump() for view in self._view.findChildren(CustomCameraView)]
         preferences.setValue("CuraCameraPosition/stored_views", stored_views)
-
+        
+    def _dialogVisibleChanged(self, visible: bool):
+        """Connect or disconnect the views such that they are only called on transformation changes when the dialog is
+        visible"""
+        
+        for view in self._view.findChildren(CustomCameraView):
+            if visible:
+                view.controller.getScene().getActiveCamera().transformationChanged.connect(view.onTransformationChanged)
+            else:
+                view.controller.getScene().getActiveCamera().transformationChanged.disconnect(view.onTransformationChanged)
+                
+        if visible:
+            # Get The actual camera position for showing in the dialog
+            self._actual._getCameraValues(self._actual.controller.getScene().getActiveCamera())
+            self._actual.transformationChanged.emit()
