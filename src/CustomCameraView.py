@@ -153,6 +153,8 @@ class CustomCameraView(QObject):
     @pyqtProperty(float, notify=zoomChanged)
     def zoom(self) -> float:
         """Zoom factor only used when in orthographic mode"""
+        if self._perspective:
+            return 0.
         return round(self._zoom, 3)
     
     @zoom.setter
