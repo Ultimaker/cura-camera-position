@@ -37,10 +37,6 @@ UM.Dialog
                 id: cameraView
                 name: "actual"
                 live: false
-//                onTransformationChanged:
-//                {
-//                    actualLocation.text = cameraView.description
-//                }
             }
             
             Label
@@ -171,21 +167,7 @@ UM.Dialog
             }  
         }
     }
-    
-    function decoupleLive()
-    {
-        stored1.live = false
-        stored2.live = false
-        stored3.live = false
-        stored4.live = false
-        stored5.live = false
-        stored6.live = false
-        stored7.live = false
-        stored8.live = false
-        stored9.live = false
-        stored10.live = false
-    }
-    
+      
     rightButtons: Button
     {
         id: closeButton
@@ -193,7 +175,6 @@ UM.Dialog
         
         onClicked:
          {
-            dialog.decoupleLive();
             dialog.visible = false;
          }
     }
@@ -205,8 +186,9 @@ UM.Dialog
 
         onClicked:
         {
-            dialog.decoupleLive();
             dialog.storeViews();
+            enabled: false;
+            tabPositionGroup.current = null;
         }
     }
 }

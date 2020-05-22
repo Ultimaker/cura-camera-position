@@ -146,15 +146,14 @@ class CustomCameraView(QObject):
     
     @perspective.setter
     def perspective(self, value: bool):
-        if value != self._controller:
-            self._controller.setCameraPerspective(value)
-            self._perspective = value
-            self.perspectiveChanged.emit()
+        self._controller.setCameraPerspective(value)
+        self._perspective = value
+        self.perspectiveChanged.emit()
             
     @pyqtProperty(float, notify=zoomChanged)
     def zoom(self) -> float:
         """Zoom factor only used when in orthographic mode"""
-        return self._zoom
+        return round(self._zoom, 3)
     
     @zoom.setter
     def zoom(self, value: float) -> None:
@@ -165,13 +164,11 @@ class CustomCameraView(QObject):
 
     def __call__(self) -> None:
         """Calling the instance sets the active camera to the described state vector"""
-        self._controller.getScene().getActiveCamera().transformationChanged.connect(self.onTransformationChanged)
         self._controller.setCameraOrientation(ai=self._ai * pi / 180, aj=self._aj * pi / 180, ak=self._ak * pi / 180)
         self._controller.setCameraPosition(self._x, self._y, self._z)
         self._controller.setCameraPerspective(self._perspective)
         if not self._perspective:
             self._controller.setCameraZoomFactor(self._zoom)
-        self._controller.getScene().getActiveCamera().transformationChanged.disconnect(self.onTransformationChanged)
 
     def __repr__(self) -> str:
         projection = ', perspective' if self._perspective else ', zoom: {}, orthographic '.format(self.zoom)
@@ -192,6 +189,7 @@ class CustomCameraView(QObject):
     @controller.setter
     def controller(self, value: Controller) -> None:
         self._controller: Controller = value
+        self._controller.getScene().getActiveCamera().transformationChanged.connect(self.onTransformationChanged)
 
     def onTransformationChanged(self, camera: Camera) -> None:
         """Callback that updates the values on the background when coupled with the active camera"""
@@ -231,14 +229,14 @@ class CustomCameraView(QObject):
         :return: Dictionary describing the state vector of the camera view
         """
         return {'name': self._name,
-                'x': float(self._x),
-                'y': float(self._y),
-                'z': float(self._z),
-                'ai': float(self._ai),
-                'aj': float(self._aj),
-                'ak': float(self._ak),
-                'zoom': float(self._zoom),
-                'perspective': self._perspective}
+                'x': float(self.x),
+                'y': float(self.y),
+                'z': float(self.z),
+                'ai': float(self.ai),
+                'aj': float(self.aj),
+                'ak': float(self.ak),
+                'zoom': float(self.zoom),
+                'perspective': self.perspective}
     
     def load(self, state_vector: Dict[str, float]) -> None:
         """Restores a state vector to a camera view

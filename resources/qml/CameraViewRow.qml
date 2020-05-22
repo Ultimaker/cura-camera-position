@@ -28,6 +28,8 @@ RowLayout
         roll.value = cameraView.ai;
         pitch.value = cameraView.aj;
         yaw.value = cameraView.ak;
+        zoom.value = cameraView.zoom;
+        perspective.value = cameraView.perspective;
     }
     
     CPP.CustomCameraView
@@ -63,6 +65,7 @@ RowLayout
 
         onCheckedChanged:
         {
+            cameraView.live = checked;
             if (checked)
             {
                 cameraView.perspective = perspective.checked
@@ -74,7 +77,6 @@ RowLayout
                 cameraView.ak = roll.value    
                 cameraView.zoom = zoom.value
             }
-            cameraView.live = checked;
         }
     }
     TextFieldWithLabel
@@ -88,6 +90,7 @@ RowLayout
         onEditingFinished:
         {
             cameraView.x = value;
+            base.changedView();
         }
     }
     TextFieldWithLabel
@@ -101,6 +104,7 @@ RowLayout
         onEditingFinished:
         {
             cameraView.y = value;
+            base.changedView();
         }
     }
     TextFieldWithLabel
@@ -113,6 +117,7 @@ RowLayout
         onEditingFinished:
         {
             cameraView.z = value;
+            base.changedView();
         }
     }
     TextFieldWithLabel
@@ -125,6 +130,7 @@ RowLayout
         onEditingFinished:
         {
             cameraView.ai = value;
+            base.changedView();
         }
     }
     TextFieldWithLabel
@@ -137,6 +143,7 @@ RowLayout
         onEditingFinished:
         {
             cameraView.aj = value;
+            base.changedView();
         }
     }
     TextFieldWithLabel
@@ -149,18 +156,20 @@ RowLayout
         onEditingFinished:
         {
             cameraView.ak = value;
+            base.changedView();
         }
     }
     TextFieldWithLabel
     {
         id: zoom
         readOnly: !live.checked + perspective.checked
-        textWidth: 30 * screenScaleFactor
+        textWidth: 35 * screenScaleFactor
         labelWidth: 15 * screenScaleFactor
         text: "zoom"
         onEditingFinished:
         {
             cameraView.zoom = value;
+            base.changedView();
         }
     }
     CheckBox
@@ -172,7 +181,7 @@ RowLayout
         onClicked:
         {
             cameraView.perspective = checked
+            base.changedView();
         }
     }
-
 }
