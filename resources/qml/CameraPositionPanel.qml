@@ -16,7 +16,7 @@ UM.Dialog
     minimumHeight: screenScaleFactor * 400;
     width: groupBox.width
     height: { groupBox.height + screenScaleFactor * 80 }
-//    modality: Qt.NonModal Todo: Make it work nonmodal
+    modality: Qt.NonModal //Todo: Make it work nonmodal
     
     signal storeViews
     
