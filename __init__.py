@@ -1,8 +1,8 @@
 from .src import CameraPosition
 from PyQt5.QtQml import qmlRegisterType
-from .src.CustomCameraView import CustomCameraView
+from .src.StoredViewsModel import StoredViewsModel
 
-qmlRegisterType(CustomCameraView, 'CameraPositionPlugin', 1, 0, 'CustomCameraView')
+qmlRegisterType(StoredViewsModel, 'CameraPositionPlugin', 1, 0, 'StoredViewsModel')
 
 def getMetaData():
     return {}
