@@ -1,6 +1,6 @@
-import QtQuick 2.3
+import QtQuick 2.7
 import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.14
+import QtQuick.Layouts 1.2
 
 import UM 1.4 as UM
 import Cura 1.0 as Cura
