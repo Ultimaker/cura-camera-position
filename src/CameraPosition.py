@@ -1,20 +1,19 @@
-import ast
 import os
 from math import pi
-from typing import cast
+from typing import Optional
 
-from PyQt5.QtCore import QObject, pyqtProperty, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, pyqtProperty, pyqtSignal
 from UM.Controller import Controller
 from UM.Extension import Extension
+from UM.Logger import Logger
 from UM.Math.Matrix import Matrix
 from UM.Math.Quaternion import Quaternion
 from UM.Math.Vector import Vector
 from UM.PluginRegistry import PluginRegistry
 from UM.Scene.Camera import Camera
 from UM.i18n import i18nCatalog
-from cura.CuraApplication import CuraApplication
 
-from .StoredViewsModel import StoredViewsModel
+from cura.CuraApplication import CuraApplication
 
 i18n_catalog = i18nCatalog("cura")
 
@@ -30,16 +29,10 @@ class CameraPositionExtension(QObject, Extension):
 
         self.setMenuName("Camera Position")
         self.addMenuItem("Set camera position", self.showPopup)
-        self.addMenuItem("reset views", self._resetStoredViews)
 
-        self._stored_views = self._loadStoredViews()
-        for view in self._stored_views:
-            self.addMenuItem(view['name'], lambda: self._actuateView(**view))
-
-        self._manager = cast('CameraPositionExtension', None)
-        self._controller = cast(Controller, None)
-        self._camera = cast(Camera, None)
-        self._stored_views_model = cast(StoredViewsModel, None)
+        self._manager: Optional['CameraPositionExtension'] = None
+        self._controller: Optional[Controller] = None
+        self._camera: Optional[Camera] = None
 
         self._naam = ''
         self._position = Vector(0., 0., 0.)
@@ -50,36 +43,17 @@ class CameraPositionExtension(QObject, Extension):
         CuraApplication.getInstance().mainWindowChanged.connect(self._createPlugin)
 
     def _createPlugin(self):
+        Logger.log("d", "Creating CameraPositionPanel view")
         plugin_path = PluginRegistry.getInstance().getPluginPath(self.getPluginId())
         path = os.path.join(plugin_path, "resources", "qml", "CameraPositionPanel.qml")
-        self._manager = CuraApplication.getInstance().createQmlComponent(path, {"manager": self})
-        self._stored_views_model = StoredViewsModel(CuraApplication.getInstance(), parent=self._manager)
-        self._stored_views_model.addStoredViews(self._stored_views)
+        self._manager: Optional['CameraPositionExtension'] = CuraApplication.getInstance().createQmlComponent(path, {
+            "manager": self})
         self._controller = CuraApplication.getInstance().getController()
         self._camera = self._controller.getScene().getActiveCamera()
         self._camera.transformationChanged.connect(self._onTransformationChanged)
 
     def showPopup(self):
         self._manager.show()
-
-    def _loadStoredViews(self):
-        preferences = CuraApplication.getInstance().getPreferences()
-        stored_views = preferences.getValue("CuraCameraPosition/stored_views")
-        if stored_views is None:
-            preferences.addPreference("CuraCameraPosition/stored_views", "[]")
-            return [
-                {'name': 'test', 'x': 100., 'y': 0., 'z': 0., 'roll': 90., 'pitch': 0., 'yaw': 0., 'perspective': True,
-                 'zoom': 0.}]
-        return ast.literal_eval(stored_views)
-
-    def _resetStoredViews(self):
-        preferences = CuraApplication.getInstance().getPreferences()
-        preferences.removePreference("CuraCameraPosition/stored_views")
-        # Todo: remove the menuitems
-
-    @pyqtSlot(result=QObject)
-    def getStoredViewsModel(self):
-        return self._stored_views_model
 
     def _onTransformationChanged(self, camera: Camera):
         self._orientation = camera.getOrientation().toMatrix().getEuler() * 180 / pi
@@ -98,7 +72,7 @@ class CameraPositionExtension(QObject, Extension):
         rotation_matrix.setByEuler(**dict(zip(('ai', 'aj', 'ak'), vec.getData())))
         return Quaternion.fromMatrix(rotation_matrix)
 
-    def _actuateView(self, name, x, y, z, roll, pitch, yaw, perspective, zoom):
+    def _actuateView(self, name, x, y, z, roll, pitch, yaw, perspective, zoom, live):
         self._camera.transformationChanged.disconnect(self._onTransformationChanged)
         self._naam = name
         self._camera.setPosition(self._position.set(x=x, y=y, z=z))
@@ -153,7 +127,7 @@ class CameraPositionExtension(QObject, Extension):
     @pyqtProperty(float, notify=rollChanged)
     def roll(self) -> float:
         """roll component of the camera state vector in [mm]"""
-        return round(self._orientation.x, 0)
+        return round(self._orientation.x, 2)
 
     @roll.setter
     def roll(self, value: float):
@@ -166,7 +140,7 @@ class CameraPositionExtension(QObject, Extension):
     @pyqtProperty(float, notify=pitchChanged)
     def pitch(self) -> float:
         """pitch component of the camera state vector in [mm]"""
-        return round(self._orientation.y, 0)
+        return round(self._orientation.y, 2)
 
     @pitch.setter
     def pitch(self, value: float):
@@ -179,7 +153,7 @@ class CameraPositionExtension(QObject, Extension):
     @pyqtProperty(float, notify=yawChanged)
     def yaw(self) -> float:
         """yaw component of the camera state vector in [mm]"""
-        return round(self._orientation.z, 0)
+        return round(self._orientation.z, 2)
 
     @yaw.setter
     def yaw(self, value: float):
