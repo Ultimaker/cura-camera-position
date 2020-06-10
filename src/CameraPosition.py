@@ -30,9 +30,9 @@ class CameraPositionExtension(QObject, Extension):
         self.setMenuName("Camera Position")
         self.addMenuItem("Set camera position", self.showPopup)
 
-        self._manager: Optional['CameraPositionExtension'] = None
-        self._controller: Optional[Controller] = None
-        self._camera: Optional[Camera] = None
+        self._manager = None  # Optional['CameraPositionExtension']
+        self._controller = None  # Optional[Controller]
+        self._camera = None  # type: Optional[Camera]
 
         self._naam = ''
         self._position = Vector(0., 0., 0.)
