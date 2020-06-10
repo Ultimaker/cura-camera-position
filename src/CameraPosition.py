@@ -30,9 +30,9 @@ class CameraPositionExtension(QObject, Extension):
         self.setMenuName("Camera Position")
         self.addMenuItem("Set camera position", self.showPopup)
 
-        self._manager: Optional['CameraPositionExtension'] = None
-        self._controller: Optional[Controller] = None
-        self._camera: Optional[Camera] = None
+        self._manager = None  # type: Optional['CameraPositionExtension']
+        self._controller = None  # type: Optional[Controller]
+        self._camera = None  # type: Optional[Camera]
 
         self._naam = ''
         self._position = Vector(0., 0., 0.)
@@ -46,8 +46,8 @@ class CameraPositionExtension(QObject, Extension):
         Logger.log("d", "Creating CameraPositionPanel view")
         plugin_path = PluginRegistry.getInstance().getPluginPath(self.getPluginId())
         path = os.path.join(plugin_path, "resources", "qml", "CameraPositionPanel.qml")
-        self._manager: Optional['CameraPositionExtension'] = CuraApplication.getInstance().createQmlComponent(path, {
-            "manager": self})
+        self._manager = CuraApplication.getInstance().createQmlComponent(path, {
+            "manager": self})  # type: Optional['CameraPositionExtension']
         self._controller = CuraApplication.getInstance().getController()
         self._preferences = CuraApplication.getInstance().getPreferences()
         self._perspective = self._preferences.getValue("general/camera_perspective_mode") == 'perspective'
