@@ -34,7 +34,6 @@ class CameraPositionExtension(QObject, Extension):
         self._controller = None  # type: Optional[Controller]
         self._camera = None  # type: Optional[Camera]
 
-        self._naam = ''
         self._position = Vector(0., 0., 0.)
         self._orientation = Vector(0., 0., 0.)
         self._perspective = True
@@ -76,10 +75,9 @@ class CameraPositionExtension(QObject, Extension):
         rotation_matrix.setByEuler(**dict(zip(('ai', 'aj', 'ak'), vec.getData())))
         return Quaternion.fromMatrix(rotation_matrix)
 
-    def _actuateView(self, name, x, y, z, roll, pitch, yaw, perspective, zoom, live):
+    def _actuateView(self, x, y, z, roll, pitch, yaw, perspective, zoom, live):
         self._camera.transformationChanged.disconnect(self._onTransformationChanged)
         self._camera.perspectiveChanged.disconnect(self._onTransformationChanged)
-        self._naam = name
         self._camera.setPosition(self._position.set(x=x, y=y, z=z))
         self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(x=roll, y=pitch, z=yaw)))
         self._preferences.setValue("general/camera_perspective_mode", "perspective" if perspective else "orthographic")
