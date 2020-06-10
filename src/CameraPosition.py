@@ -49,6 +49,7 @@ class CameraPositionExtension(QObject, Extension):
         self._manager: Optional['CameraPositionExtension'] = CuraApplication.getInstance().createQmlComponent(path, {
             "manager": self})
         self._controller = CuraApplication.getInstance().getController()
+        self._preferences = CuraApplication.getInstance().getPreferences()
         self._camera = self._controller.getScene().getActiveCamera()
         self._camera.transformationChanged.connect(self._onTransformationChanged)
 
@@ -78,8 +79,9 @@ class CameraPositionExtension(QObject, Extension):
         self._naam = name
         self._camera.setPosition(self._position.set(x=x, y=y, z=z))
         self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(x=roll, y=pitch, z=yaw)))
-        self._camera.setZoomFactor(zoom)
+        self._preferences.setValue("general/camera_perspective_mode", "perspective" if perspective else "orthographic")
         self._camera.setPerspective(perspective)
+        self._camera.setZoomFactor(zoom)
         self._camera.transformationChanged.connect(self._onTransformationChanged)
         self._bombsaway(*self._props)
 
@@ -171,6 +173,7 @@ class CameraPositionExtension(QObject, Extension):
 
     @perspective.setter
     def perspective(self, value: bool):
+        self._preferences.setValue("general/camera_perspective_mode", "perspective" if value else "orthographic")
         self._controller.setCameraPerspective(value)
         self.perspectiveChanged.emit()
 
