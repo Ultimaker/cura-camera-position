@@ -11,12 +11,10 @@ Row
     
     property alias value: textField.text
     property alias text: label.text
-    property alias readOnly: textField.readOnly
     
     property alias textWidth: textField.width
     property alias labelWidth: label.width
     property alias validator: textField.validator
-    readOnly: { textField.readOnly }
     
     height: childrenRect.height
     
