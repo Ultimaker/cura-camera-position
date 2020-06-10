@@ -50,8 +50,10 @@ class CameraPositionExtension(QObject, Extension):
             "manager": self})
         self._controller = CuraApplication.getInstance().getController()
         self._preferences = CuraApplication.getInstance().getPreferences()
+        self._perspective = self._preferences.getValue("general/camera_perspective_mode") == 'perspective'
         self._camera = self._controller.getScene().getActiveCamera()
         self._camera.transformationChanged.connect(self._onTransformationChanged)
+        self._camera.perspectiveChanged.connect(self._onTransformationChanged)
 
     def showPopup(self):
         self._onTransformationChanged(self._camera)
@@ -76,6 +78,7 @@ class CameraPositionExtension(QObject, Extension):
 
     def _actuateView(self, name, x, y, z, roll, pitch, yaw, perspective, zoom, live):
         self._camera.transformationChanged.disconnect(self._onTransformationChanged)
+        self._camera.perspectiveChanged.disconnect(self._onTransformationChanged)
         self._naam = name
         self._camera.setPosition(self._position.set(x=x, y=y, z=z))
         self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(x=roll, y=pitch, z=yaw)))
@@ -83,6 +86,7 @@ class CameraPositionExtension(QObject, Extension):
         self._camera.setPerspective(perspective)
         self._camera.setZoomFactor(zoom)
         self._camera.transformationChanged.connect(self._onTransformationChanged)
+        self._camera.perspectiveChanged.connect(self._onTransformationChanged)
         self._bombsaway(*self._props)
 
     xChanged = pyqtSignal()
@@ -188,4 +192,5 @@ class CameraPositionExtension(QObject, Extension):
     @zoom.setter
     def zoom(self, value: float) -> None:
         self._camera.setZoomFactor(value)
+        self._zoom = value
         self.zoomChanged.emit()

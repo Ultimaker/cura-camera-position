@@ -104,18 +104,19 @@ UM.Dialog
             
             text: "zoom"
             value: manager.zoom
-            validator: DoubleValidator {bottom: 0; top: 10;}
+            validator: DoubleValidator {bottom: -10; top: 10;}
             onEditingFinished: { manager.zoom = value; }
         }
         CheckBox
         {
             id: perspectiveCheckBox
             text: "perspective"
-            checked: Qt.binding(function() { return manager.perspective; });
+            checked: manager.perspective;
             onClicked:
             {
                 zoomField.visible = Qt.binding(function() { return !checked; });
                 manager.perspective = Qt.binding(function() { return checked; });
+                checked = Qt.binding(function() { return manager.perspective; });
             }
         }
     }
