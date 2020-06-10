@@ -53,6 +53,7 @@ class CameraPositionExtension(QObject, Extension):
         self._camera.transformationChanged.connect(self._onTransformationChanged)
 
     def showPopup(self):
+        self._onTransformationChanged(self._camera)
         self._manager.show()
 
     def _onTransformationChanged(self, camera: Camera):
@@ -77,8 +78,8 @@ class CameraPositionExtension(QObject, Extension):
         self._naam = name
         self._camera.setPosition(self._position.set(x=x, y=y, z=z))
         self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(x=roll, y=pitch, z=yaw)))
-        self._camera.setPerspective(perspective)
         self._camera.setZoomFactor(zoom)
+        self._camera.setPerspective(perspective)
         self._camera.transformationChanged.connect(self._onTransformationChanged)
         self._bombsaway(*self._props)
 

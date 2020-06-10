@@ -12,9 +12,9 @@ UM.Dialog
     modality: Qt.NonModal
     flags: Qt.Tool | Qt.Widget| Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint
     
-    minimumHeight: positionColumn.height + finishButton.height + (2 * UM.Theme.getSize("default_margin").width) * screenScaleFactor;
-    maximumHeight: minimumHeight;
-    height: minimumHeight;
+    minimumHeight: positionColumn.height + finishButton.height + 2 * UM.Theme.getSize("default_margin").width;
+    maximumHeight: minimumHeight
+    height: minimumHeight
     
     minimumWidth: 100 * screenScaleFactor;
     width: 150 * screenScaleFactor;
@@ -24,14 +24,15 @@ UM.Dialog
     {
         id: positionColumn
         
-        anchors.leftMargin: UM.Theme.getSize("default_margin").width *  screenScaleFactor;
-        anchors.rightMargin: base.widt - UM.Theme.getSize("default_margin").width * screenScaleFactor;
+        height: childrenRect.height
+        anchors.leftMargin: UM.Theme.getSize("default_margin").width;
+        anchors.rightMargin: base.width - UM.Theme.getSize("default_margin").width;
         
         TextFieldWithLabel
         {
             id: xField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - (2 * UM.Theme.getSize("default_margin").width) * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
             
             text: "x"
             value: manager.x
@@ -42,7 +43,7 @@ UM.Dialog
         {
             id: yField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - (2 * UM.Theme.getSize("default_margin").width) * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
             
             text: "y"
             value: manager.y
@@ -53,7 +54,7 @@ UM.Dialog
         {
             id: zField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - (2 * UM.Theme.getSize("default_margin").width) * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
             
             text: "z"
             value: manager.z
@@ -65,7 +66,7 @@ UM.Dialog
         {
             id: rollField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - (2 * UM.Theme.getSize("default_margin").width) * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
             
             text: "roll"
             value: manager.roll
@@ -76,7 +77,7 @@ UM.Dialog
         {
             id: pitchField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - (2 * UM.Theme.getSize("default_margin").width) * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
             
             text: "pitch"
             value: manager.pitch
@@ -87,12 +88,35 @@ UM.Dialog
         {
             id: yawField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - (2 * UM.Theme.getSize("default_margin").width) * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
             
             text: "yaw"
             value: manager.yaw
             validator: DoubleValidator {bottom: -360; top: 360;}
             onEditingFinished: { manager.yaw = value; }
+        }
+        TextFieldWithLabel
+        {
+            id: zoomField
+            labelWidth: 20 * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            visible: !manager.perspective;
+            
+            text: "zoom"
+            value: manager.zoom
+            validator: DoubleValidator {bottom: 0; top: 10;}
+            onEditingFinished: { manager.zoom = value; }
+        }
+        CheckBox
+        {
+            id: perspectiveCheckBox
+            text: "perspective"
+            checked: Qt.binding(function() { return manager.perspective; });
+            onClicked:
+            {
+                zoomField.visible = Qt.binding(function() { return !checked; });
+                manager.perspective = Qt.binding(function() { return checked; });
+            }
         }
     }
     Cura.PrimaryButton
@@ -105,6 +129,3 @@ UM.Dialog
         enabled: true
     }
 }
-
-
-
