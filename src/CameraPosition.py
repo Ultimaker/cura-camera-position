@@ -61,7 +61,7 @@ class CameraPositionExtension(QObject, Extension):
     def _onTransformationChanged(self, camera: Camera):
         self._orientation = camera.getOrientation().toMatrix().getEuler() * 180 / pi
         self._position = camera.getPosition()
-        self._perspective = camera.isPerspective()
+        self._perspective = self._preferences.getValue("general/camera_perspective_mode") == 'perspective'
         self._zoom = camera.getZoomFactor()
         self._bombsaway(*self._props)
 
@@ -176,7 +176,6 @@ class CameraPositionExtension(QObject, Extension):
     @perspective.setter
     def perspective(self, value: bool):
         self._preferences.setValue("general/camera_perspective_mode", "perspective" if value else "orthographic")
-        self._controller.setCameraPerspective(value)
         self.perspectiveChanged.emit()
 
     zoomChanged = pyqtSignal()
