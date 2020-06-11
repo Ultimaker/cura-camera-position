@@ -75,18 +75,6 @@ class CameraPositionExtension(QObject, Extension):
         rotation_matrix.setByEuler(**dict(zip(('ai', 'aj', 'ak'), vec.getData())))
         return Quaternion.fromMatrix(rotation_matrix)
 
-    def _actuateView(self, x, y, z, roll, pitch, yaw, perspective, zoom, live):
-        self._camera.transformationChanged.disconnect(self._onTransformationChanged)
-        self._camera.perspectiveChanged.disconnect(self._onTransformationChanged)
-        self._camera.setPosition(self._position.set(x=x, y=y, z=z))
-        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(x=roll, y=pitch, z=yaw)))
-        self._preferences.setValue("general/camera_perspective_mode", "perspective" if perspective else "orthographic")
-        self._camera.setPerspective(perspective)
-        self._camera.setZoomFactor(zoom)
-        self._camera.transformationChanged.connect(self._onTransformationChanged)
-        self._camera.perspectiveChanged.connect(self._onTransformationChanged)
-        self._bombsaway(*self._props)
-
     xChanged = pyqtSignal()
     """Signal that emits when the x value is changed"""
 
