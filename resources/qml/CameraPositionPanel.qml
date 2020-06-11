@@ -10,7 +10,7 @@ UM.Dialog
     id: base
     title: "Camera"
     modality: Qt.NonModal
-    flags: Qt.Tool | Qt.Widget| Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint
+    flags: Qt.Tool | Qt.Widget| Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowStaysOnTopHint
     
     minimumHeight: positionColumn.height + finishButton.height + 2 * UM.Theme.getSize("default_margin").width;
     maximumHeight: minimumHeight
