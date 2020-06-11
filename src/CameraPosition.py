@@ -1,21 +1,27 @@
 import os
-import ast
-from typing import cast, List
+from math import pi
+from typing import Optional
 
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtProperty, pyqtSignal
+from UM.Controller import Controller
 from UM.Extension import Extension
 from UM.Logger import Logger
+from UM.Math.Matrix import Matrix
+from UM.Math.Quaternion import Quaternion
+from UM.Math.Vector import Vector
 from UM.PluginRegistry import PluginRegistry
+from UM.Scene.Camera import Camera
 from UM.i18n import i18nCatalog
-from cura.CuraApplication import CuraApplication
 
-from .CustomCameraView import CustomCameraView
+from cura.CuraApplication import CuraApplication
 
 i18n_catalog = i18nCatalog("cura")
 
 
 class CameraPositionExtension(QObject, Extension):
     """A Cura plugin to let the user interact with the camera and store up to 10 defined views"""
+
+    _props = ('x', 'y', 'z', 'roll', 'pitch', 'yaw', 'perspective', 'zoom')
 
     def __init__(self, parent=None) -> None:
         QObject.__init__(self, parent)
@@ -24,73 +30,152 @@ class CameraPositionExtension(QObject, Extension):
         self.setMenuName("Camera Position")
         self.addMenuItem("Set camera position", self.showPopup)
 
-        self._view = None
-        self._actual = None
+        self._manager = None  # type: Optional['CameraPositionExtension']
+        self._controller = None  # type: Optional[Controller]
+        self._camera = None  # type: Optional[Camera]
 
-        CuraApplication.getInstance().mainWindowChanged.connect(self._createView)
+        self._position = Vector(0., 0., 0.)
+        self._orientation = Vector(0., 0., 0.)
+        self._perspective = True
+        self._zoom = 1.
 
-    def showPopup(self) -> None:
-        """Show the pop-up dialog"""
-        
-        # Create the view if it wasn't all ready created
-        if self._view is None:
-            self._createView()
-            if self._view is None:
-                Logger.log("e", "Not creating Camera Position window since the QML component failed to be created.")
-                return
-        self._view.show()
+        CuraApplication.getInstance().mainWindowChanged.connect(self._createPlugin)
 
-    def _createView(self) -> None:
-        """Create the plugin dialog component"""
-        
-        Logger.log("d", "Creating Camera Position plugin view.")
-
+    def _createPlugin(self):
+        Logger.log("d", "Creating CameraPositionPanel view")
         plugin_path = PluginRegistry.getInstance().getPluginPath(self.getPluginId())
         path = os.path.join(plugin_path, "resources", "qml", "CameraPositionPanel.qml")
-        self._view = CuraApplication.getInstance().createQmlComponent(path, {"manager": self})
+        self._manager = CuraApplication.getInstance().createQmlComponent(path, {
+            "manager": self})  # type: Optional['CameraPositionExtension']
+        self._controller = CuraApplication.getInstance().getController()
+        self._preferences = CuraApplication.getInstance().getPreferences()
+        self._perspective = self._preferences.getValue("general/camera_perspective_mode") == 'perspective'
+        self._camera = self._controller.getScene().getActiveCamera()
+        self._camera.transformationChanged.connect(self._onTransformationChanged)
+        self._camera.perspectiveChanged.connect(self._onTransformationChanged)
 
-        self._view.visibleChanged.connect(self._dialogVisibleChanged)
-        stored_views = self._initStoredViews()
-        
-        idx = 0
-        for view in self._view.findChildren(CustomCameraView):
-            view.controller = CuraApplication.getInstance().getController()
-            if view.name != 'actual':
-                view.load(stored_views[idx])
-                self.addMenuItem(view.name, view)
-                idx += 1
-            else:
-                self._actual = view
-            
-    def _initStoredViews(self) -> List[CustomCameraView]:
-        """Loads all views stored in preference if this is a first time use it will initialize the stored view
-        preference"""
-        
-        self._view.storeViews.connect(self._storeViews)
-        preferences = CuraApplication.getInstance().getPreferences()
-        # preferences.removePreference("CuraCameraPosition/stored_views")
-        stored_views = preferences.getValue("CuraCameraPosition/stored_views")
-        if stored_views is None:
-            default = CustomCameraView()
-            stored_views = []
-            for idx in range(1, 11):
-                default.name = 'stored_{}'.format(idx)
-                stored_views.append(default.dump())
-            preferences.addPreference("CuraCameraPosition/stored_views", stored_views)
-        else:
-            stored_views = ast.literal_eval(stored_views)
-        return stored_views
-            
-    def _storeViews(self) -> None:
-        """Store the views to the preference"""
-        
-        preferences = CuraApplication.getInstance().getPreferences()
-        stored_views = [view.dump() for view in self._view.findChildren(CustomCameraView) if view.name != 'actual']
-        preferences.setValue("CuraCameraPosition/stored_views", stored_views)
-        
-    def _dialogVisibleChanged(self, visible: bool):
-          
-        if visible:
-            # Get The actual camera position for showing in the dialog
-            self._actual._getCameraValues(self._actual.controller.getScene().getActiveCamera())
-            self._actual.transformationChanged.emit()
+    def showPopup(self):
+        self._onTransformationChanged(self._camera)
+        self._manager.show()
+
+    def _onTransformationChanged(self, camera: Camera):
+        self._orientation = camera.getOrientation().toMatrix().getEuler() * 180 / pi
+        self._position = camera.getPosition()
+        self._perspective = self._preferences.getValue("general/camera_perspective_mode") == 'perspective'
+        self._zoom = camera.getZoomFactor()
+        self._bombsaway(*self._props)
+
+    def _bombsaway(self, *args):
+        for arg in args:
+            getattr(self, '{}Changed'.format(arg)).emit()
+
+    def _buildRotationQuaternion(self, vec: Vector):
+        vec *= pi / 180
+        rotation_matrix = Matrix()
+        rotation_matrix.setByEuler(**dict(zip(('ai', 'aj', 'ak'), vec.getData())))
+        return Quaternion.fromMatrix(rotation_matrix)
+
+    xChanged = pyqtSignal()
+    """Signal that emits when the x value is changed"""
+
+    @pyqtProperty(float, notify=xChanged)
+    def x(self) -> float:
+        """x component of the camera state vector in [mm]"""
+        return round(self._position.x, 0)
+
+    @x.setter
+    def x(self, value: float):
+        self._camera.setPosition(self._position.set(x=value))
+        self.xChanged.emit()
+
+    yChanged = pyqtSignal()
+    """Signal that emits when the y value is changed"""
+
+    @pyqtProperty(float, notify=yChanged)
+    def y(self) -> float:
+        """y component of the camera state vector in [mm]"""
+        return round(self._position.y, 0)
+
+    @y.setter
+    def y(self, value: float):
+        self._camera.setPosition(self._position.set(y=value))
+        self.yChanged.emit()
+
+    zChanged = pyqtSignal()
+    """Signal that emits when the z value is changed"""
+
+    @pyqtProperty(float, notify=zChanged)
+    def z(self) -> float:
+        """z component of the camera state vector in [mm]"""
+        return round(self._position.z, 0)
+
+    @z.setter
+    def z(self, value: float):
+        self._camera.setPosition(self._position.set(z=value))
+        self.zChanged.emit()
+
+    rollChanged = pyqtSignal()
+    """Signal that emits when the roll value is changed"""
+
+    @pyqtProperty(float, notify=rollChanged)
+    def roll(self) -> float:
+        """roll component of the camera state vector in [mm]"""
+        return round(self._orientation.x, 2)
+
+    @roll.setter
+    def roll(self, value: float):
+        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(x=value)), 1)
+        self.rollChanged.emit()
+
+    pitchChanged = pyqtSignal()
+    """Signal that emits when the pitch value is changed"""
+
+    @pyqtProperty(float, notify=pitchChanged)
+    def pitch(self) -> float:
+        """pitch component of the camera state vector in [mm]"""
+        return round(self._orientation.y, 2)
+
+    @pitch.setter
+    def pitch(self, value: float):
+        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(y=value)), 1)
+        self.pitchChanged.emit()
+
+    yawChanged = pyqtSignal()
+    """Signal that emits when the yaw value is changed"""
+
+    @pyqtProperty(float, notify=yawChanged)
+    def yaw(self) -> float:
+        """yaw component of the camera state vector in [mm]"""
+        return round(self._orientation.z, 2)
+
+    @yaw.setter
+    def yaw(self, value: float):
+        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(z=value)), 1)
+        self.yawChanged.emit()
+
+    perspectiveChanged = pyqtSignal()
+    """Signal that emits when the perspective is changed"""
+
+    @pyqtProperty(bool, notify=perspectiveChanged)
+    def perspective(self) -> bool:
+        """Perspective (True) or Orthographic (False)"""
+        return self._perspective
+
+    @perspective.setter
+    def perspective(self, value: bool):
+        self._preferences.setValue("general/camera_perspective_mode", "perspective" if value else "orthographic")
+        self.perspectiveChanged.emit()
+
+    zoomChanged = pyqtSignal()
+    """Signal that emits when the zoom value is changed"""
+
+    @pyqtProperty(float, notify=zoomChanged)
+    def zoom(self) -> float:
+        """Zoom factor only used when in orthographic mode"""
+        return round(self._zoom, 3)
+
+    @zoom.setter
+    def zoom(self, value: float) -> None:
+        self._camera.setZoomFactor(value)
+        self._zoom = value
+        self.zoomChanged.emit()

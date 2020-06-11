@@ -1,194 +1,133 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.4
+import QtQuick.Controls 2.3
+import QtQuick.Layouts 1.2
 
 import UM 1.4 as UM
 import Cura 1.0 as Cura
 
-import CameraPositionPlugin 1.0 as CPP
-
 UM.Dialog
 {
-    id: dialog
-
-    title: "Camera Position"
-
-    minimumWidth: screenScaleFactor * 820;
-    minimumHeight: screenScaleFactor * 400;
-    width: groupBox.width
-    height: { groupBox.height + screenScaleFactor * 80 }
-    modality: Qt.NonModal //Todo: Make it work nonmodal
+    id: base
+    title: "Camera"
+    modality: Qt.NonModal
+    flags: Qt.Tool | Qt.Widget| Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowStaysOnTopHint
     
-    signal storeViews
+    minimumHeight: positionColumn.height + finishButton.height + 2 * UM.Theme.getSize("default_margin").width;
+    maximumHeight: minimumHeight
+    height: minimumHeight
     
-    GroupBox
+    minimumWidth: 100 * screenScaleFactor;
+    width: 150 * screenScaleFactor;
+    color: UM.Theme.getColor("main_background")
+    
+    Column
     {
-        id: groupBox
-        title: "Views"
-        height: { contents.height + screenScaleFactor * 40 }
+        id: positionColumn
         
-        ExclusiveGroup { id: tabPositionGroup }
-        Column
+        height: childrenRect.height
+        anchors.leftMargin: UM.Theme.getSize("default_margin").width;
+        anchors.rightMargin: base.width - UM.Theme.getSize("default_margin").width;
+        
+        TextFieldWithLabel
         {
-            id: contents
-            spacing: UM.Theme.getSize("thin_margin").width
+            id: xField
+            labelWidth: 20 * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
             
-            CPP.CustomCameraView
-            {
-                id: cameraView
-                name: "actual"
-                live: false
-            }
+            text: "x"
+            value: manager.x
+            validator: IntValidator {bottom: -1000; top: 1000;}
+            onEditingFinished: { manager.x = value; }
+        }
+        TextFieldWithLabel
+        {
+            id: yField
+            labelWidth: 20 * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
             
-            Label
+            text: "y"
+            value: manager.y
+            validator: IntValidator {bottom: -1000; top: 1000;}
+            onEditingFinished: { manager.y = value; } 
+        }
+        TextFieldWithLabel
+        {
+            id: zField
+            labelWidth: 20 * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            
+            text: "z"
+            value: manager.z
+            validator: IntValidator {bottom: -1000; top: 1000;}
+            onEditingFinished: { manager.z = value; }
+        }
+        
+        TextFieldWithLabel
+        {
+            id: rollField
+            labelWidth: 20 * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            
+            text: "roll"
+            value: manager.roll
+            validator: DoubleValidator {bottom: -360; top: 360;}
+            onEditingFinished: { manager.roll = value; }
+        }
+        TextFieldWithLabel
+        {
+            id: pitchField
+            labelWidth: 20 * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            
+            text: "pitch"
+            value: manager.pitch
+            validator: DoubleValidator {bottom: -360; top: 360;}
+            onEditingFinished: { manager.pitch = value; } 
+        }
+        TextFieldWithLabel
+        {
+            id: yawField
+            labelWidth: 20 * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            
+            text: "yaw"
+            value: manager.yaw
+            validator: DoubleValidator {bottom: -360; top: 360;}
+            onEditingFinished: { manager.yaw = value; }
+        }
+        TextFieldWithLabel
+        {
+            id: zoomField
+            labelWidth: 20 * screenScaleFactor;
+            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            visible: !manager.perspective;
+            
+            text: "zoom"
+            value: manager.zoom
+            // Hardcoded lower limit of the zoomfactor in Uranium is -0.495 everything below that value is undefined
+            validator: DoubleValidator {bottom: -0.495; top: 10;}  
+            onEditingFinished: { manager.zoom = value; }
+        }
+        CheckBox
+        {
+            id: perspectiveCheckBox
+            text: "perspective"
+            checked: manager.perspective;
+            onClicked:
             {
-                id: actualLocation
-                text: cameraView.description
+                zoomField.visible = Qt.binding(function() { return !checked; });
+                manager.perspective = Qt.binding(function() { return checked; });
+                checked = Qt.binding(function() { return manager.perspective; });
             }
-            // Todo: Make it work with a Reapeater
-            CameraViewRow
-            {
-                name: "stored_1"
-                id: "stored1"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_2"
-                id: "stored2"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_3"
-                id: "stored3"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_4"
-                id: "stored4"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_5"
-                id: "stored5"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_6"
-                id: "stored6"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_7"
-                id: "stored7"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_8"
-                id: "stored8"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_9"
-                id: "stored9"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }
-            CameraViewRow
-            {
-                name: "stored_10"
-                id: "stored10"
-                exclusiveGroup: tabPositionGroup
-                live: false
-                anchors.right: contents.right
-                onChangedView:
-                {
-                    saveButton.enabled = true;
-                }
-            }  
         }
     }
-      
-    rightButtons: Button
+    Cura.PrimaryButton
     {
-        id: closeButton
-        text: "Close"
-        
-        onClicked:
-         {
-            dialog.visible = false;
-         }
-    }
-    leftButtons: Button
-    {
-        id: saveButton
-        text: "Save"
-        enabled: false
-
-        onClicked:
-        {
-            dialog.storeViews();
-            enabled: false;
-            tabPositionGroup.current = null;
-        }
+        id: finishButton
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        text: "Finish"
+        onClicked: { base.close() }
+        enabled: true
     }
 }
