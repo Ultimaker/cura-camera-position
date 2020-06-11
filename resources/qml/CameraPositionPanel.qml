@@ -104,7 +104,8 @@ UM.Dialog
             
             text: "zoom"
             value: manager.zoom
-            validator: DoubleValidator {bottom: -0.495; top: 10;}
+            // Hardcoded lower limit of the zoomfactor in Uranium is -0.495 everything below that value is undefined
+            validator: DoubleValidator {bottom: -0.495; top: 10;}  
             onEditingFinished: { manager.zoom = value; }
         }
         CheckBox
