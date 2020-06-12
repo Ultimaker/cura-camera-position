@@ -34,6 +34,8 @@ Row
         id: textField
         text: "0"
         
+        selectByMouse: true
+        
         onEditingFinished: base.editingFinished()
         Keys.onEnterPressed: base.editingFinished()
         Keys.onReturnPressed: base.editingFinished()
