@@ -25,14 +25,15 @@ UM.Dialog
         id: positionColumn
         
         height: childrenRect.height
-        anchors.leftMargin: UM.Theme.getSize("default_margin").width;
-        anchors.rightMargin: base.width - UM.Theme.getSize("default_margin").width;
+        spacing: UM.Theme.getSize("narrow_margin").width
+        x: UM.Theme.getSize("default_margin").width
+        width: base.width - 2 * UM.Theme.getSize("default_margin").width
         
         TextFieldWithLabel
         {
             id: xField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            textWidth: positionColumn.width - labelWidth - 2 * spacing;
             
             text: "x"
             value: manager.x
@@ -43,7 +44,7 @@ UM.Dialog
         {
             id: yField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            textWidth: positionColumn.width - labelWidth - 2 * spacing;
             
             text: "y"
             value: manager.y
@@ -54,7 +55,7 @@ UM.Dialog
         {
             id: zField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            textWidth: positionColumn.width - labelWidth - 2 * spacing;
             
             text: "z"
             value: manager.z
@@ -66,7 +67,7 @@ UM.Dialog
         {
             id: rollField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            textWidth: positionColumn.width - labelWidth - 2 * spacing;
             
             text: "roll"
             value: manager.roll
@@ -77,7 +78,7 @@ UM.Dialog
         {
             id: pitchField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            textWidth: positionColumn.width - labelWidth - 2 * spacing;
             
             text: "pitch"
             value: manager.pitch
@@ -88,7 +89,7 @@ UM.Dialog
         {
             id: yawField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            textWidth: positionColumn.width - labelWidth - 2 * spacing;
             
             text: "yaw"
             value: manager.yaw
@@ -99,7 +100,7 @@ UM.Dialog
         {
             id: zoomField
             labelWidth: 20 * screenScaleFactor;
-            textWidth: base.width - labelWidth -  spacing - 2 * UM.Theme.getSize("default_margin").width;
+            textWidth: positionColumn.width - labelWidth - 2 * spacing;
             visible: !manager.perspective;
             
             text: "zoom"

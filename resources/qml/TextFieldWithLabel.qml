@@ -20,7 +20,7 @@ Row
     
     signal editingFinished();
     
-    spacing: UM.Theme.getSize("narrow_margin").width * screenScaleFactor;
+    spacing: UM.Theme.getSize("narrow_margin").width;
     
     Label
     {
