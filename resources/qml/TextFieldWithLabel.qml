@@ -20,7 +20,7 @@ Row
     
     signal editingFinished();
     
-    spacing: UM.Theme.getSize("narrow_margin").width * screenScaleFactor;
+    spacing: UM.Theme.getSize("narrow_margin").width;
     
     Label
     {
@@ -33,6 +33,8 @@ Row
     {
         id: textField
         text: "0"
+        
+        selectByMouse: true
         
         onEditingFinished: base.editingFinished()
         Keys.onEnterPressed: base.editingFinished()
