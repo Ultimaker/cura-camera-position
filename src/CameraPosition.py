@@ -78,104 +78,96 @@ class CameraPositionExtension(QObject, Extension):
     xChanged = pyqtSignal()
     """Signal that emits when the x value is changed"""
 
-    @pyqtProperty(float, notify=xChanged)
+    def setX(self, value: float) -> None:
+        self._camera.setPosition(self._position.set(x=value))
+        self.xChanged.emit()
+
+    @pyqtProperty(float, fset=setX, notify=xChanged)
     def x(self) -> float:
         """x component of the camera state vector in [mm]"""
         return round(self._position.x, 0)
 
-    @x.setter
-    def x(self, value: float):
-        self._camera.setPosition(self._position.set(x=value))
-        self.xChanged.emit()
-
     yChanged = pyqtSignal()
     """Signal that emits when the y value is changed"""
 
-    @pyqtProperty(float, notify=yChanged)
+    def setY(self, value: float) -> None:
+        self._camera.setPosition(self._position.set(y=value))
+        self.yChanged.emit()
+
+    @pyqtProperty(float, fset=setY, notify=yChanged)
     def y(self) -> float:
         """y component of the camera state vector in [mm]"""
         return round(self._position.y, 0)
 
-    @y.setter
-    def y(self, value: float):
-        self._camera.setPosition(self._position.set(y=value))
-        self.yChanged.emit()
-
     zChanged = pyqtSignal()
     """Signal that emits when the z value is changed"""
 
-    @pyqtProperty(float, notify=zChanged)
+    def setZ(self, value: float) -> None:
+        self._camera.setPosition(self._position.set(z=value))
+        self.zChanged.emit()
+
+    @pyqtProperty(float, fset=setZ, notify=zChanged)
     def z(self) -> float:
         """z component of the camera state vector in [mm]"""
         return round(self._position.z, 0)
 
-    @z.setter
-    def z(self, value: float):
-        self._camera.setPosition(self._position.set(z=value))
-        self.zChanged.emit()
-
     rollChanged = pyqtSignal()
     """Signal that emits when the roll value is changed"""
 
-    @pyqtProperty(float, notify=rollChanged)
+    def setRoll(self, value: float) -> None:
+        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(x=value)), 1)
+        self.rollChanged.emit()
+
+    @pyqtProperty(float, fset=setRoll, notify=rollChanged)
     def roll(self) -> float:
         """roll component of the camera state vector in [mm]"""
         return round(self._orientation.x, 2)
 
-    @roll.setter
-    def roll(self, value: float):
-        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(x=value)), 1)
-        self.rollChanged.emit()
-
     pitchChanged = pyqtSignal()
     """Signal that emits when the pitch value is changed"""
 
-    @pyqtProperty(float, notify=pitchChanged)
+    def setPitch(self, value: float) -> None:
+        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(y=value)), 1)
+        self.pitchChanged.emit()
+
+    @pyqtProperty(float, fset=setPitch, notify=pitchChanged)
     def pitch(self) -> float:
         """pitch component of the camera state vector in [mm]"""
         return round(self._orientation.y, 2)
 
-    @pitch.setter
-    def pitch(self, value: float):
-        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(y=value)), 1)
-        self.pitchChanged.emit()
-
     yawChanged = pyqtSignal()
     """Signal that emits when the yaw value is changed"""
 
-    @pyqtProperty(float, notify=yawChanged)
+    def setYaw(self, value: float) -> None:
+        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(z=value)), 1)
+        self.yawChanged.emit()
+
+    @pyqtProperty(float, fset=setYaw, notify=yawChanged)
     def yaw(self) -> float:
         """yaw component of the camera state vector in [mm]"""
         return round(self._orientation.z, 2)
 
-    @yaw.setter
-    def yaw(self, value: float):
-        self._camera.setOrientation(self._buildRotationQuaternion(self._orientation.set(z=value)), 1)
-        self.yawChanged.emit()
-
     perspectiveChanged = pyqtSignal()
     """Signal that emits when the perspective is changed"""
 
-    @pyqtProperty(bool, notify=perspectiveChanged)
+    def setPerspective(self, value: bool) -> None:
+        self._preferences.setValue("general/camera_perspective_mode", "perspective" if value else "orthographic")
+        self.perspectiveChanged.emit()
+
+    @pyqtProperty(bool, fset=setPerspective, notify=perspectiveChanged)
     def perspective(self) -> bool:
         """Perspective (True) or Orthographic (False)"""
         return self._perspective
 
-    @perspective.setter
-    def perspective(self, value: bool):
-        self._preferences.setValue("general/camera_perspective_mode", "perspective" if value else "orthographic")
-        self.perspectiveChanged.emit()
-
     zoomChanged = pyqtSignal()
     """Signal that emits when the zoom value is changed"""
 
-    @pyqtProperty(float, notify=zoomChanged)
-    def zoom(self) -> float:
-        """Zoom factor only used when in orthographic mode"""
-        return round(self._zoom, 3)
-
-    @zoom.setter
-    def zoom(self, value: float) -> None:
+    def setZoom(self, value: float) -> None:
         self._camera.setZoomFactor(value)
         self._zoom = value
         self.zoomChanged.emit()
+
+    @pyqtProperty(float, fset=setZoom, notify=zoomChanged)
+    def zoom(self) -> float:
+        """Zoom factor only used when in orthographic mode"""
+        return round(self._zoom, 3)
